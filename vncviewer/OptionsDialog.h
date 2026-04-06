@@ -127,6 +127,7 @@ protected:
   Fl_Check_Button *emulateMBCheckbox;
   Fl_Check_Button *alwaysCursorCheckbox;
   Fl_Choice *cursorTypeChoice;
+  Fl_Int_Input *scrollWheelSpeedInput;
   Fl_Group *keyboardGroup;
   Fl_Check_Button *systemKeysCheckbox;
   Fl_Group *clipboardGroup;

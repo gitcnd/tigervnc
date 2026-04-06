@@ -368,6 +368,13 @@ void OptionsDialog::loadOptions(void)
     cursorTypeChoice->value(0);
   }
   handleAlwaysCursor(alwaysCursorCheckbox, this);
+
+  {
+    char scrollWheelSpeedValueStr[16];
+    snprintf(scrollWheelSpeedValueStr, sizeof(scrollWheelSpeedValueStr),
+             "%d", (int)scrollWheelSpeed);
+    scrollWheelSpeedInput->value(scrollWheelSpeedValueStr);
+  }
 }
 
 
@@ -516,6 +523,13 @@ void OptionsDialog::storeOptions(void)
   shared.setParam(sharedCheckbox->value());
   reconnectOnError.setParam(reconnectCheckbox->value());
   alwaysCursor.setParam(alwaysCursorCheckbox->value());
+
+  {
+    int scrollWheelSpeedValue = atoi(scrollWheelSpeedInput->value());
+    if (scrollWheelSpeedValue < 1) { scrollWheelSpeedValue = 1; }
+    if (scrollWheelSpeedValue > 50) { scrollWheelSpeedValue = 50; }
+    scrollWheelSpeed.setParam(scrollWheelSpeedValue);
+  }
 
   if (cursorTypeChoice->value() == 1) {
     cursorType.setParam("System");
@@ -941,6 +955,11 @@ void OptionsDialog::createInputPage(int tx, int ty, int tw, int th)
     fltk_adjust_choice(cursorTypeChoice);
 
     ty += CHOICE_HEIGHT + TIGHT_MARGIN;
+
+    scrollWheelSpeedInput = new Fl_Int_Input(LBLLEFT(tx, ty, 150,
+                                                     INPUT_HEIGHT,
+                                                     _("Scroll wheel speed")));
+    ty += INPUT_HEIGHT + TIGHT_MARGIN;
 
   }
   ty -= TIGHT_MARGIN;

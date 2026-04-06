@@ -99,6 +99,42 @@ It also contains the following systemd service:
 * vncserver@.service - a service to start a user session with Xvnc and one of
                        the desktop environments available on the system.
 
+Scroll Wheel Speed Fix (Fork Patch)
+====================================
+
+This fork fixes a long-standing scroll wheel bug that affects all VNC clients
+connecting to macOS servers (Sonoma 14.4 and later).  See `TigerVNC issue
+#1741 <https://github.com/TigerVNC/tigervnc/issues/1741>`_.
+
+**The problem:**  The RFB protocol models scroll wheel events as X11 button
+4/5/6/7 press+release pairs, with no magnitude field.  macOS Sonoma 14.4+
+interprets each such event as a 1-pixel scroll instead of a 1-line scroll,
+making scrolling unusable in browsers, Finder, and most GUI applications.
+
+**Two fixes applied:**
+
+1. **Magnitude preservation** -- The original code discarded the OS-reported
+   scroll magnitude (``Fl::event_dy()``), always sending exactly one button
+   press+release per wheel event regardless of how many notches were scrolled.
+   Now the full magnitude is honoured.
+
+2. **ScrollWheelSpeed multiplier** -- A new ``ScrollWheelSpeed`` parameter
+   (default 1) multiplies the number of button press+release pairs sent per
+   scroll notch.  For macOS servers, a value of **12** restores normal
+   line-level scrolling::
+
+       vncviewer -ScrollWheelSpeed 12 hostname:0
+
+   This setting is also available in the GUI via **TigerVNC Options >
+   Input > Mouse > Scroll wheel speed**.
+
+**Files changed:**
+
+- ``vncviewer/Viewport.cxx`` -- wheel event handler loop
+- ``vncviewer/parameters.cxx`` / ``parameters.h`` -- new ``ScrollWheelSpeed`` parameter
+- ``vncviewer/OptionsDialog.cxx`` / ``OptionsDialog.h`` -- GUI control
+
+
 ACKNOWLEDGEMENTS
 ================
 

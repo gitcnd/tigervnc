@@ -57,6 +57,12 @@ core::IntParameter
                        "Time in milliseconds to rate-limit successive "
                        "pointer events",
                        17, 0, INT_MAX);
+core::IntParameter
+  scrollWheelSpeed("ScrollWheelSpeed",
+                   "Number of scroll button press/release pairs sent "
+                   "per wheel notch. Increase when connecting to macOS "
+                   "servers where scrolling feels too slow (try 10).",
+                   1, 1, 50);
 core::BoolParameter
   emulateMiddleButton("EmulateMiddleButton",
                       "Emulate middle mouse button by pressing left "

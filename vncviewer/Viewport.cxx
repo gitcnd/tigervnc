@@ -496,21 +496,29 @@ int Viewport::handle(int event)
 #endif
 
     if (event == FL_MOUSEWHEEL) {
-      wheelMask = 0;
-      if (Fl::event_dy() < 0)
-        wheelMask |= 1 << 3;
-      if (Fl::event_dy() > 0)
-        wheelMask |= 1 << 4;
-      if (Fl::event_dx() < 0)
-        wheelMask |= 1 << 5;
-      if (Fl::event_dx() > 0)
-        wheelMask |= 1 << 6;
+      int dy = Fl::event_dy();
+      int dx = Fl::event_dx();
+      int speed = scrollWheelSpeed;
+      core::Point wheelPos(Fl::event_x() - x(), Fl::event_y() - y());
 
-      // A quick press of the wheel "button", followed by a immediate
-      // release below
-      handlePointerEvent({Fl::event_x() - x(), Fl::event_y() - y()},
-                         buttonMask | wheelMask);
-    } 
+      // RFB models scrolling as X11 button 4/5/6/7 press+release
+      // pairs with no magnitude field. Each pair = one scroll "tick".
+      // We loop over abs(dy/dx) to honour the OS-reported notch count,
+      // and multiply by ScrollWheelSpeed to compensate for servers
+      // (notably macOS Sonoma 14.4+) that map each tick to 1 pixel
+      // instead of 1 line.
+      for (int i = 0, n = abs(dy) * speed; i < n; i++) {
+        wheelMask = (dy < 0) ? (1 << 3) : (1 << 4);
+        handlePointerEvent(wheelPos, buttonMask | wheelMask);
+        handlePointerEvent(wheelPos, buttonMask);
+      }
+      for (int i = 0, n = abs(dx) * speed; i < n; i++) {
+        wheelMask = (dx < 0) ? (1 << 5) : (1 << 6);
+        handlePointerEvent(wheelPos, buttonMask | wheelMask);
+        handlePointerEvent(wheelPos, buttonMask);
+      }
+      return 1;
+    }
 
     handlePointerEvent({Fl::event_x() - x(), Fl::event_y() - y()}, buttonMask);
     return 1;
